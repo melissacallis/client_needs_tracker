@@ -211,6 +211,18 @@
   .avatar.unknown { background: var(--teal-light); color: var(--teal); }
 
   .field-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+
+  .client-card .cell {
+    border-left: 1px solid var(--line);
+    padding-left: 12px;
+    align-self: stretch;
+  }
+  .appt-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 0 2px;
+  }
   .field-value { font-size: 13.5px; color: var(--ink); font-weight: 500; }
   .field-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
@@ -581,18 +593,18 @@ function buildCardHtml(c, ev) {
 
   card.innerHTML = `
     <div class="avatar ${gender}">${initials(c['Client Initials'])}</div>
-    <div>
+    <div class="cell">
       <div class="field-label">Bed</div>
       <div class="field-value">${c['Bed'] || '\u2014'}</div>
       <div class="field-sub">${c['Case Manager'] || ''}</div>
     </div>
-    <div>
+    <div class="cell">
       <div class="field-label">Appointment</div>
       <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
+      <div class="appt-group">${apptBadgeHtml}${apptStatusHtml}</div>
       <div class="field-sub">${c['Appointment Details'] || c['Doctor'] || ''}</div>
-      ${apptBadgeHtml} ${apptStatusHtml}
     </div>
-    <div>
+    <div class="cell">
       <div class="field-label">Scripts / Pharmacy</div>
       <div class="field-value">${c['Pharmacy'] || '\u2014'}</div>
       <div class="field-sub"><span class="${scriptsClasses}">${ev.scripts.label}</span></div>
