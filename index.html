@@ -26,6 +26,12 @@
     --amber-bg: #fdf1de;
     --green: #276a2f;
     --green-bg: #e9f3e8;
+    --doctor-bg: #dbe9fb;
+    --doctor-fg: #1f4f8f;
+    --casemgr-bg: #ece1f9;
+    --casemgr-fg: #5a2f96;
+    --other-bg: #fdeadb;
+    --other-fg: #935a15;
     --shadow: 0 1px 2px rgba(20,40,35,0.06), 0 4px 14px rgba(20,40,35,0.05);
   }
   * { box-sizing: border-box; }
@@ -186,6 +192,36 @@
   .flag-pill.red { background: var(--red-bg); color: var(--red); }
   .flag-pill.amber { background: var(--amber-bg); color: var(--amber); }
 
+  .appt-badge {
+    display: inline-block; font-size: 10.5px; font-weight: 700;
+    padding: 3px 9px; border-radius: 6px; margin-top: 4px;
+  }
+  .appt-badge.doctor { background: var(--doctor-bg); color: var(--doctor-fg); }
+  .appt-badge.casemgr { background: var(--casemgr-bg); color: var(--casemgr-fg); }
+  .appt-badge.other { background: var(--other-bg); color: var(--other-fg); }
+
+  @keyframes pulse-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+  }
+  .blinking {
+    animation: pulse-blink 1.4s ease-in-out infinite;
+  }
+
+  .notes-row {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+    font-size: 12.5px;
+    color: var(--slate);
+    font-style: italic;
+  }
+  .notes-row .notes-label {
+    font-style: normal; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; font-size: 10px; letter-spacing: 0.4px; margin-right: 6px;
+  }
+
   .empty-state, .error-state {
     text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px;
   }
@@ -225,7 +261,7 @@
     <h2>Connect your data source</h2>
     <p>Paste the Web App URL from your Google Apps Script deployment. This is stored only in your browser and is never sent anywhere except directly to your own script.</p>
     <label for="script-url">Apps Script Web App URL</label>
-    <input type="text" id="script-url" placeholder="ccc">
+    <input type="text" id="script-url" placeholder="https://script.google.com/macros/s/.../exec">
     <button onclick="saveConfig()">Save and connect</button>
     <div id="config-error"></div>
   </div>
@@ -309,11 +345,46 @@ function daysUntil(dateStr) {
   return Math.round((d - today) / 86400000);
 }
 
-function evaluateClient(c) {
-  const daysAdmitted = null; // Admit Date isn't tracked on this sheet - length-of-stay flag is disabled
-  const apptDateRaw = c['Appointment Date'];
-  const scriptsReady = (c['Scripts Ready (Y/N)'] || '').toString().trim().toUpperCase() === 'Y';
+function apptTypeClass(apptWith) {
+  const v = (apptWith || '').trim().toLowerCase();
+  if (v === 'doctor') return 'doctor';
+  if (v === 'case manager') return 'casemgr';
+  if (v === 'other') return 'other';
+  return null;
+}
 
+function isToday(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return false;
+  const today = new Date();
+  return d.getFullYear() === today.getFullYear() &&
+         d.getMonth() === today.getMonth() &&
+         d.getDate() === today.getDate();
+}
+
+function evaluateScripts(c) {
+  const status = (c['Scripts Status'] || '').trim();
+  const submittedDate = c['Submitted Date'];
+
+  if (status !== 'Submitted') {
+    return { label: 'Not submitted', level: 'red', blink: false };
+  }
+  if (!submittedDate) {
+    return { label: 'Submitted (no date entered)', level: 'amber', blink: false };
+  }
+  const submittedIsToday = isToday(submittedDate);
+  const now = new Date();
+  const pastFourPM = now.getHours() >= 16;
+
+  if (submittedIsToday && !pastFourPM) {
+    return { label: 'Submitted \u2014 ready by 4:00 PM today', level: 'amber', blink: true };
+  }
+  // Submitted today after 4pm, or submitted on an earlier day -> ready
+  return { label: 'Ready for pickup', level: 'green', blink: false };
+}
+
+function evaluateClient(c) {
+  const apptDateRaw = c['Appointment Date'];
   const flags = [];
   let worst = 'green';
 
@@ -340,12 +411,16 @@ function evaluateClient(c) {
   }
 
   // Scripts
-  if (!scriptsReady) {
-    flags.push({ text: 'Scripts not ready \u2014 follow up', level: 'amber' });
+  const scripts = evaluateScripts(c);
+  if (scripts.level === 'red') {
+    flags.push({ text: scripts.label, level: 'red' });
+    escalate('red');
+  } else if (scripts.level === 'amber') {
+    flags.push({ text: scripts.label, level: 'amber' });
     escalate('amber');
   }
 
-  return { daysAdmitted, flags, urgency: worst };
+  return { flags, urgency: worst, scripts };
 }
 
 function renderClients() {
@@ -381,6 +456,18 @@ function renderClients() {
     const gender = genderFromBed(c['Bed']);
     const flagsHtml = ev.flags.map(f => `<span class="flag-pill ${f.level}">${f.text}</span>`).join('');
 
+    const apptClass = apptTypeClass(c['Appointment With']);
+    const apptBadgeHtml = apptClass
+      ? `<span class="appt-badge ${apptClass}">${c['Appointment With']}</span>`
+      : '';
+
+    const scriptsClasses = ['badge', ev.scripts.level, ev.scripts.blink ? 'blinking' : ''].join(' ').trim();
+
+    const notesText = (c['Notes'] || '').trim();
+    const notesHtml = notesText
+      ? `<div class="notes-row"><span class="notes-label">Notes</span>${notesText}</div>`
+      : '';
+
     card.innerHTML = `
       <div class="avatar ${gender}">${initials(c['Client Initials'])}</div>
       <div>
@@ -391,12 +478,13 @@ function renderClients() {
       <div>
         <div class="field-label">Appointment</div>
         <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
-        <div class="field-sub">${c['Appointment Type'] || c['Other Provider'] || ''}${c['Doctor'] ? ' \u2014 ' + c['Doctor'] : ''}</div>
+        <div class="field-sub">${c['Appointment Details'] || c['Doctor'] || ''}</div>
+        ${apptBadgeHtml}
       </div>
       <div>
         <div class="field-label">Scripts / Pharmacy</div>
-        <div class="field-value">${(c['Scripts Ready (Y/N)'] || '').toUpperCase() === 'Y' ? 'Ready' : 'Not ready'}</div>
-        <div class="field-sub">${c['Pharmacy'] || '\u2014'}</div>
+        <div class="field-value">${c['Pharmacy'] || '\u2014'}</div>
+        <div class="field-sub"><span class="${scriptsClasses}">${ev.scripts.label}</span></div>
       </div>
       <div style="text-align:right;">
         <span class="badge ${ev.urgency}">${ev.urgency === 'red' ? 'Action needed' : ev.urgency === 'amber' ? 'Watch' : 'On track'}</span>
@@ -405,7 +493,7 @@ function renderClients() {
     const flagRow = document.createElement('div');
     flagRow.className = 'flags';
     flagRow.style.gridColumn = '1 / -1';
-    flagRow.innerHTML = flagsHtml;
+    flagRow.innerHTML = flagsHtml + notesHtml;
     card.appendChild(flagRow);
 
     list.appendChild(card);
@@ -422,9 +510,18 @@ async function fetchData() {
   if (!scriptUrl) { showConfig(); return; }
   try {
     const res = await fetch(scriptUrl);
-    const json = await res.json();
+    const rawText = await res.text();
+    let json;
+    try {
+      json = JSON.parse(rawText);
+    } catch (parseErr) {
+      showError('The data source did not return valid data. This usually means a script error on the Google side ' +
+        '(wrong sheet name, not redeployed after an edit, etc). Raw response start: ' +
+        rawText.substring(0, 200));
+      return;
+    }
     if (json.error) {
-      showError(json.error);
+      showError('Access issue: ' + json.error);
       return;
     }
     clients = json.clients || [];
@@ -435,7 +532,8 @@ async function fetchData() {
       '<span class="status-dot"></span>Updated ' + new Date(json.updated).toLocaleTimeString();
     renderClients();
   } catch (err) {
-    showError('Could not reach the data source. Check the Web App URL in Settings and make sure it is deployed and accessible.');
+    showError('Network-level failure reaching the URL (likely CORS or an invalid/undeployed URL). ' +
+      'Technical detail: ' + err.message);
   }
 }
 
@@ -478,4 +576,4 @@ fetchData();
 </script>
 
 </body>
-</html>
+</html>			
