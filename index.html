@@ -145,7 +145,36 @@
   .legend { display: flex; gap: 16px; margin-left: auto; align-items: center; font-size: 11.5px; color: var(--muted); }
   .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 5px; vertical-align: -1px; }
 
+  .board-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .board-column-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--line);
+  }
+  .board-column-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .board-column-header.male .dot { background: var(--male-fg); }
+  .board-column-header.female .dot { background: var(--female-fg); }
+
   .client-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .client-card.empty-bed {
+    opacity: 0.55;
+    justify-content: center;
+    grid-template-columns: 60px 1fr;
+  }
+  .client-card.empty-bed .field-value { color: var(--muted); font-style: italic; }
 
   .client-card {
     background: var(--card);
@@ -230,6 +259,7 @@
   @media (max-width: 760px) {
     .client-card { grid-template-columns: 1fr; }
     .summary-bar { grid-template-columns: repeat(2, 1fr); }
+    .board-columns { grid-template-columns: 1fr; }
     .legend { margin-left: 0; }
   }
 </style>
@@ -297,7 +327,16 @@
       </div>
     </div>
 
-    <div class="client-list" id="client-list"></div>
+    <div class="board-columns">
+      <div>
+        <div class="board-column-header male"><span class="dot"></span>Male</div>
+        <div class="client-list" id="client-list-male"></div>
+      </div>
+      <div>
+        <div class="board-column-header female"><span class="dot"></span>Female</div>
+        <div class="client-list" id="client-list-female"></div>
+      </div>
+    </div>
     <div class="empty-state" id="empty-state" style="display:none;">No clients match this filter.</div>
   </div>
 
@@ -423,80 +462,110 @@ function evaluateClient(c) {
   return { flags, urgency: worst, scripts };
 }
 
+function buildCardHtml(c, ev) {
+  const gender = genderFromBed(c['Bed']);
+  const flagsHtml = ev.flags.map(f => `<span class="flag-pill ${f.level}">${f.text}</span>`).join('');
+
+  const apptClass = apptTypeClass(c['Appointment With']);
+  const apptBadgeHtml = apptClass
+    ? `<span class="appt-badge ${apptClass}">${c['Appointment With']}</span>`
+    : '';
+
+  const scriptsClasses = ['badge', ev.scripts.level, ev.scripts.blink ? 'blinking' : ''].join(' ').trim();
+
+  const notesText = (c['Notes'] || '').trim();
+  const notesHtml = notesText
+    ? `<div class="notes-row"><span class="notes-label">Notes</span>${notesText}</div>`
+    : '';
+
+  const card = document.createElement('div');
+  card.className = `client-card urgent-${ev.urgency}`;
+  card.innerHTML = `
+    <div class="avatar ${gender}">${initials(c['Client Initials'])}</div>
+    <div>
+      <div class="field-label">Bed</div>
+      <div class="field-value">${c['Bed'] || '\u2014'}</div>
+      <div class="field-sub">${c['Case Manager'] || ''}</div>
+    </div>
+    <div>
+      <div class="field-label">Appointment</div>
+      <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
+      <div class="field-sub">${c['Appointment Details'] || c['Doctor'] || ''}</div>
+      ${apptBadgeHtml}
+    </div>
+    <div>
+      <div class="field-label">Scripts / Pharmacy</div>
+      <div class="field-value">${c['Pharmacy'] || '\u2014'}</div>
+      <div class="field-sub"><span class="${scriptsClasses}">${ev.scripts.label}</span></div>
+    </div>
+    <div style="text-align:right;">
+      <span class="badge ${ev.urgency}">${ev.urgency === 'red' ? 'Action needed' : ev.urgency === 'amber' ? 'Watch' : 'On track'}</span>
+    </div>
+  `;
+  const flagRow = document.createElement('div');
+  flagRow.className = 'flags';
+  flagRow.style.gridColumn = '1 / -1';
+  flagRow.innerHTML = flagsHtml + notesHtml;
+  card.appendChild(flagRow);
+  return card;
+}
+
+function buildEmptyBedCard(bedLabel) {
+  const card = document.createElement('div');
+  card.className = 'client-card empty-bed';
+  card.innerHTML = `
+    <div class="avatar unknown">\u2014</div>
+    <div>
+      <div class="field-label">Bed</div>
+      <div class="field-value">${bedLabel} \u2014 Open</div>
+    </div>
+  `;
+  return card;
+}
+
 function renderClients() {
-  const list = document.getElementById('client-list');
+  const listMale = document.getElementById('client-list-male');
+  const listFemale = document.getElementById('client-list-female');
   const emptyState = document.getElementById('empty-state');
-  list.innerHTML = '';
+  listMale.innerHTML = '';
+  listFemale.innerHTML = '';
 
   let counts = { red: 0, amber: 0, green: 0 };
 
-  const evaluated = clients.map(c => ({ raw: c, eval: evaluateClient(c) }));
-  evaluated.forEach(item => counts[item.eval.urgency]++);
+  const evaluated = clients.map(c => ({ raw: c, eval: evaluateClient(c), gender: genderFromBed(c['Bed']) }));
+  evaluated.forEach(item => {
+    if ((item.raw['Client Initials'] || '').trim()) counts[item.eval.urgency]++;
+  });
 
   document.getElementById('count-red').textContent = counts.red;
   document.getElementById('count-amber').textContent = counts.amber;
   document.getElementById('count-green').textContent = counts.green;
-  document.getElementById('count-total').textContent = clients.length;
+  document.getElementById('count-total').textContent =
+    evaluated.filter(e => (e.raw['Client Initials'] || '').trim()).length;
 
-  const order = { red: 0, amber: 1, green: 2 };
-  evaluated.sort((a, b) => order[a.eval.urgency] - order[b.eval.urgency]);
+  const filtered = currentFilter === 'all'
+    ? evaluated
+    : evaluated.filter(e => (e.raw['Client Initials'] || '').trim() ? e.eval.urgency === currentFilter : true);
 
-  const filtered = currentFilter === 'all' ? evaluated : evaluated.filter(e => e.eval.urgency === currentFilter);
+  // Sort by bed label (e.g. "M - 1A", "M - 1B", "M - 2A"...) so rows map to physical room order
+  const bedSort = (a, b) => (a.raw['Bed'] || '').localeCompare(b.raw['Bed'] || '', undefined, { numeric: true });
 
-  if (filtered.length === 0) {
+  const maleRows = filtered.filter(e => e.gender === 'male').sort(bedSort);
+  const femaleRows = filtered.filter(e => e.gender === 'female').sort(bedSort);
+
+  if (maleRows.length === 0 && femaleRows.length === 0 && currentFilter !== 'all') {
     emptyState.style.display = 'block';
-    return;
+  } else {
+    emptyState.style.display = 'none';
   }
-  emptyState.style.display = 'none';
 
-  filtered.forEach(({ raw: c, eval: ev }) => {
-    const card = document.createElement('div');
-    card.className = `client-card urgent-${ev.urgency}`;
-
-    const gender = genderFromBed(c['Bed']);
-    const flagsHtml = ev.flags.map(f => `<span class="flag-pill ${f.level}">${f.text}</span>`).join('');
-
-    const apptClass = apptTypeClass(c['Appointment With']);
-    const apptBadgeHtml = apptClass
-      ? `<span class="appt-badge ${apptClass}">${c['Appointment With']}</span>`
-      : '';
-
-    const scriptsClasses = ['badge', ev.scripts.level, ev.scripts.blink ? 'blinking' : ''].join(' ').trim();
-
-    const notesText = (c['Notes'] || '').trim();
-    const notesHtml = notesText
-      ? `<div class="notes-row"><span class="notes-label">Notes</span>${notesText}</div>`
-      : '';
-
-    card.innerHTML = `
-      <div class="avatar ${gender}">${initials(c['Client Initials'])}</div>
-      <div>
-        <div class="field-label">Bed</div>
-        <div class="field-value">${c['Bed'] || '\u2014'}</div>
-        <div class="field-sub">${c['Case Manager'] || ''}</div>
-      </div>
-      <div>
-        <div class="field-label">Appointment</div>
-        <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
-        <div class="field-sub">${c['Appointment Details'] || c['Doctor'] || ''}</div>
-        ${apptBadgeHtml}
-      </div>
-      <div>
-        <div class="field-label">Scripts / Pharmacy</div>
-        <div class="field-value">${c['Pharmacy'] || '\u2014'}</div>
-        <div class="field-sub"><span class="${scriptsClasses}">${ev.scripts.label}</span></div>
-      </div>
-      <div style="text-align:right;">
-        <span class="badge ${ev.urgency}">${ev.urgency === 'red' ? 'Action needed' : ev.urgency === 'amber' ? 'Watch' : 'On track'}</span>
-      </div>
-    `;
-    const flagRow = document.createElement('div');
-    flagRow.className = 'flags';
-    flagRow.style.gridColumn = '1 / -1';
-    flagRow.innerHTML = flagsHtml + notesHtml;
-    card.appendChild(flagRow);
-
-    list.appendChild(card);
+  maleRows.forEach(({ raw: c, eval: ev }) => {
+    const hasClient = (c['Client Initials'] || '').trim();
+    listMale.appendChild(hasClient ? buildCardHtml(c, ev) : buildEmptyBedCard(c['Bed'] || 'Unassigned'));
+  });
+  femaleRows.forEach(({ raw: c, eval: ev }) => {
+    const hasClient = (c['Client Initials'] || '').trim();
+    listFemale.appendChild(hasClient ? buildCardHtml(c, ev) : buildEmptyBedCard(c['Bed'] || 'Unassigned'));
   });
 }
 
