@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Respite Program &middot; Client Status Board</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
 <style>
   :root {
     --ink: #1c2b29;
@@ -18,8 +19,8 @@
     --sage: #9ec2b3;
     --male-bg: #dceaf6;
     --male-fg: #2c5f8a;
-    --female-bg: #f8e2ec;
-    --female-fg: #96305e;
+    --female-bg: #e7ddf5;
+    --female-fg: #5e3a96;
     --red: #a32d2d;
     --red-bg: #fbe9e9;
     --amber: #8a5a0b;
@@ -167,12 +168,12 @@
   .board-column-header.male .dot { background: var(--male-fg); }
   .board-column-header.female .dot { background: var(--female-fg); }
 
-  .client-list { display: flex; flex-direction: column; gap: 12px; }
+  .client-list { display: flex; flex-direction: column; gap: 7px; }
 
   .client-card.empty-bed {
     opacity: 0.55;
     justify-content: center;
-    grid-template-columns: 60px 1fr;
+    grid-template-columns: 44px 1fr;
   }
   .client-card.empty-bed .field-value { color: var(--muted); font-style: italic; }
 
@@ -180,11 +181,11 @@
     background: var(--card);
     border: 1px solid var(--line);
     border-left: 5px solid var(--line);
-    border-radius: 12px;
-    padding: 17px 20px;
+    border-radius: 9px;
+    padding: 9px 14px;
     display: grid;
-    grid-template-columns: 60px 1fr 1fr 1fr 90px;
-    gap: 16px;
+    grid-template-columns: 44px 1fr 1fr 1fr 78px;
+    gap: 12px;
     align-items: center;
     box-shadow: var(--shadow);
   }
@@ -192,10 +193,18 @@
   .client-card.urgent-amber { border-left-color: var(--amber); }
   .client-card.urgent-green { border-left-color: var(--green); }
 
+  @keyframes med-flash {
+    0%, 100% { border-left-color: var(--red); box-shadow: var(--shadow); }
+    50% { border-left-color: #e23b3b; box-shadow: 0 0 0 3px rgba(226,59,59,0.35), var(--shadow); }
+  }
+  .client-card.med-due {
+    animation: med-flash 1s ease-in-out infinite;
+  }
+
   .avatar {
-    width: 46px; height: 46px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 14px;
+    font-weight: 700; font-size: 12px;
   }
   .avatar.male { background: var(--male-bg); color: var(--male-fg); }
   .avatar.female { background: var(--female-bg); color: var(--female-fg); }
@@ -429,6 +438,46 @@ function pharmStatusClass(status) {
   return 'chip-gray';
 }
 
+// Is any of this client's med times within 15 minutes (before or after) of "now" in Central time?
+const MED_WINDOW_MIN = 15;
+
+function nowInCentral() {
+  // Get current time as it would read on a clock in America/Chicago
+  const str = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+  return new Date(str);
+}
+
+function parseMedTimesToMinutes(medTimesStr) {
+  // medTimesStr looks like "8:00 AM / 8:00 PM | 7:00 AM | ..." - extract every h:mm AM/PM
+  const results = [];
+  if (!medTimesStr) return results;
+  const matches = medTimesStr.match(/\d{1,2}:\d{2}\s*(AM|PM)/gi);
+  if (!matches) return results;
+  matches.forEach(m => {
+    const parts = m.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!parts) return;
+    let h = parseInt(parts[1], 10);
+    const min = parseInt(parts[2], 10);
+    const ampm = parts[3].toUpperCase();
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    results.push(h * 60 + min);
+  });
+  return results;
+}
+
+function isMedDueSoon(medTimesStr) {
+  const times = parseMedTimesToMinutes(medTimesStr);
+  if (times.length === 0) return false;
+  const central = nowInCentral();
+  const nowMin = central.getHours() * 60 + central.getMinutes();
+  return times.some(t => {
+    let diff = Math.abs(t - nowMin);
+    diff = Math.min(diff, 1440 - diff); // handle wrap around midnight
+    return diff <= MED_WINDOW_MIN;
+  });
+}
+
 function isToday(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d)) return false;
@@ -516,7 +565,8 @@ function buildCardHtml(c, ev) {
     : '';
 
   const card = document.createElement('div');
-  card.className = `client-card urgent-${ev.urgency}`;
+  const medDue = isMedDueSoon(c['Med Times']);
+  card.className = `client-card urgent-${ev.urgency}${medDue ? ' med-due' : ''}`;
   const apptStatus = (c['Appointment Status'] || '').trim();
   const apptStatusHtml = apptStatus
     ? `<span class="status-chip ${apptStatusClass(apptStatus)}">${apptStatus}</span>` : '';
@@ -687,8 +737,14 @@ function refreshNow() {
   fetchData();
 }
 
-// Auto-refresh every 5 minutes
+// Auto-refresh data every 5 minutes
 refreshTimer = setInterval(fetchData, 5 * 60 * 1000);
+
+// Re-render every 60 seconds so the med-time blink turns on/off promptly
+// (uses already-loaded data, no network call)
+setInterval(function () {
+  if (clients && clients.length) renderClients();
+}, 60 * 1000);
 
 // Initial load
 fetchData();
