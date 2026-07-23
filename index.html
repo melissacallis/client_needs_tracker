@@ -251,6 +251,27 @@
     text-transform: uppercase; font-size: 10px; letter-spacing: 0.4px; margin-right: 6px;
   }
 
+  .status-chip {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 6px; margin-top: 4px;
+  }
+  .status-chip.chip-amber { background: var(--amber-bg); color: var(--amber); }
+  .status-chip.chip-blue { background: var(--doctor-bg); color: var(--doctor-fg); }
+  .status-chip.chip-green { background: var(--green-bg); color: var(--green); }
+  .status-chip.chip-gray { background: #eef1f0; color: var(--muted); }
+
+  .med-times-row {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    padding-top: 8px;
+    font-size: 12px;
+    color: var(--slate);
+  }
+  .med-times-row .notes-label {
+    font-weight: 700; color: var(--muted);
+    text-transform: uppercase; font-size: 10px; letter-spacing: 0.4px; margin-right: 6px;
+  }
+
   .empty-state, .error-state {
     text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px;
   }
@@ -392,6 +413,22 @@ function apptTypeClass(apptWith) {
   return null;
 }
 
+function apptStatusClass(status) {
+  const v = (status || '').trim().toLowerCase();
+  if (v === 'requested') return 'chip-amber';
+  if (v === 'scheduled') return 'chip-blue';
+  if (v === 'completed') return 'chip-green';
+  return 'chip-gray';
+}
+
+function pharmStatusClass(status) {
+  const v = (status || '').trim().toLowerCase();
+  if (v === 'waiting scripts') return 'chip-amber';
+  if (v === 'dropped off') return 'chip-blue';
+  if (v === 'picked up') return 'chip-green';
+  return 'chip-gray';
+}
+
 function isToday(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d)) return false;
@@ -480,6 +517,18 @@ function buildCardHtml(c, ev) {
 
   const card = document.createElement('div');
   card.className = `client-card urgent-${ev.urgency}`;
+  const apptStatus = (c['Appointment Status'] || '').trim();
+  const apptStatusHtml = apptStatus
+    ? `<span class="status-chip ${apptStatusClass(apptStatus)}">${apptStatus}</span>` : '';
+
+  const pharmStatus = (c['Pharmacy Status'] || '').trim();
+  const pharmStatusHtml = pharmStatus
+    ? `<span class="status-chip ${pharmStatusClass(pharmStatus)}">${pharmStatus}</span>` : '';
+
+  const medTimes = (c['Med Times'] || '').trim();
+  const medTimesHtml = medTimes
+    ? `<div class="med-times-row"><span class="notes-label">Med Times</span>${medTimes}</div>` : '';
+
   card.innerHTML = `
     <div class="avatar ${gender}">${initials(c['Client Initials'])}</div>
     <div>
@@ -491,12 +540,13 @@ function buildCardHtml(c, ev) {
       <div class="field-label">Appointment</div>
       <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
       <div class="field-sub">${c['Appointment Details'] || c['Doctor'] || ''}</div>
-      ${apptBadgeHtml}
+      ${apptBadgeHtml} ${apptStatusHtml}
     </div>
     <div>
       <div class="field-label">Scripts / Pharmacy</div>
       <div class="field-value">${c['Pharmacy'] || '\u2014'}</div>
       <div class="field-sub"><span class="${scriptsClasses}">${ev.scripts.label}</span></div>
+      ${pharmStatusHtml}
     </div>
     <div style="text-align:right;">
       <span class="badge ${ev.urgency}">${ev.urgency === 'red' ? 'Action needed' : ev.urgency === 'amber' ? 'Watch' : 'On track'}</span>
@@ -505,7 +555,7 @@ function buildCardHtml(c, ev) {
   const flagRow = document.createElement('div');
   flagRow.className = 'flags';
   flagRow.style.gridColumn = '1 / -1';
-  flagRow.innerHTML = flagsHtml + notesHtml;
+  flagRow.innerHTML = flagsHtml + medTimesHtml + notesHtml;
   card.appendChild(flagRow);
   return card;
 }
