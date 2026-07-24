@@ -43,11 +43,7 @@
     gap: 14px;
     box-shadow: var(--shadow);
   }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .brand { display: flex; align-items: center; gap: 12px; }
   .brand-mark {
     width: 38px; height: 38px; border-radius: 10px;
     background: rgba(255,255,255,0.16);
@@ -57,44 +53,20 @@
   .brand-mark svg { width: 20px; height: 20px; }
   .brand-text h1 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: 0.2px; }
   .brand-text .sub { font-size: 11.5px; color: rgba(255,255,255,0.72); margin-top: 1px; }
-  header .meta {
-    font-size: 12px;
-    color: rgba(255,255,255,0.78);
-    font-variant-numeric: tabular-nums;
-  }
+  header .meta { font-size: 12px; color: rgba(255,255,255,0.78); font-variant-numeric: tabular-nums; }
   .header-right { display: flex; align-items: center; gap: 14px; }
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #6fd3a0;
-    display: inline-block;
-    margin-right: 6px;
-  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #6fd3a0; display: inline-block; margin-right: 6px; }
+  
   button.icon-btn {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: #fff;
-    border-radius: 7px;
-    padding: 7px 14px;
-    font-size: 12.5px;
-    cursor: pointer;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+    color: #fff; border-radius: 7px; padding: 7px 14px; font-size: 12.5px; cursor: pointer;
   }
   button.icon-btn:hover { background: rgba(255,255,255,0.2); }
 
-  main { max-width: 1200px; margin: 0 auto; padding: 26px 20px 60px; }
+  main { max-width: 1240px; margin: 0 auto; padding: 26px 20px 60px; }
 
-  .summary-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 22px;
-  }
-  .summary-card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 16px 18px;
-    box-shadow: var(--shadow);
-  }
+  .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .summary-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
   .summary-card .num { font-size: 27px; font-weight: 700; line-height: 1; }
   .summary-card .lbl { font-size: 11px; color: var(--muted); margin-top: 7px; letter-spacing: 0.3px; text-transform: uppercase; }
   .summary-card.red .num { color: var(--red); }
@@ -102,68 +74,30 @@
   .summary-card.green .num { color: var(--green); }
   .summary-card.teal .num { color: var(--teal-deep); }
 
-  .filter-row {
-    display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center;
-  }
-  .filter-btn {
-    border: 1px solid var(--line); background: var(--card); border-radius: 20px;
-    padding: 7px 15px; font-size: 12.5px; cursor: pointer; color: var(--slate);
-  }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+  .filter-btn { border: 1px solid var(--line); background: var(--card); border-radius: 20px; padding: 7px 15px; font-size: 12.5px; cursor: pointer; color: var(--slate); }
   .filter-btn.active { background: var(--teal-deep); color: #fff; border-color: var(--teal-deep); }
 
   .legend { display: flex; gap: 16px; margin-left: auto; align-items: center; font-size: 11.5px; color: var(--muted); }
   .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 5px; vertical-align: -1px; }
 
-  .board-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-  .board-column-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--slate);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--line);
-  }
+  .board-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .board-column-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--slate); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--line); }
   .board-column-header .dot { width: 10px; height: 10px; border-radius: 50%; }
   .board-column-header.male .dot { background: var(--male-fg); }
   .board-column-header.female .dot { background: var(--female-fg); }
 
   .client-list { display: flex; flex-direction: column; gap: 12px; }
 
-  .client-card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-left: 6px solid var(--line);
-    border-radius: 10px;
-    padding: 14px;
-    box-shadow: var(--shadow);
-  }
+  .client-card { background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--line); border-radius: 10px; padding: 14px; box-shadow: var(--shadow); }
   .client-card.urgent-red { border-left-color: var(--red); }
   .client-card.urgent-amber { border-left-color: var(--amber); }
   .client-card.urgent-green { border-left-color: var(--green); }
 
-  .client-card-grid {
-    display: grid;
-    grid-template-columns: 42px 1fr 1.2fr 1.2fr 1fr;
-    gap: 12px;
-    align-items: start;
-  }
-
+  .client-card-grid { display: grid; grid-template-columns: 42px 1fr 1.2fr 1.2fr 1fr; gap: 12px; align-items: start; }
   .client-card.empty-bed { opacity: 0.55; }
 
-  .avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 12px;
-  }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
   .avatar.male { background: var(--male-bg); color: var(--male-fg); }
   .avatar.female { background: var(--female-bg); color: var(--female-fg); }
   .avatar.unknown { background: var(--teal-light); color: var(--teal); }
@@ -172,33 +106,13 @@
   .field-value { font-size: 13.5px; color: var(--ink); font-weight: 600; }
   .field-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
 
-  .cell {
-    border-left: 1px solid var(--line);
-    padding-left: 10px;
-  }
+  .cell { border-left: 1px solid var(--line); padding-left: 10px; }
 
-  /* Custom tweaks for Bootstrap alerts inside cards */
-  .card-notifications {
-    grid-column: 1 / -1;
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .card-notifications .alert {
-    padding: 6px 12px;
-    font-size: 12px;
-    margin-bottom: 0;
-    border-radius: 6px;
-  }
+  .card-notifications { grid-column: 1 / -1; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .card-notifications .alert { padding: 6px 12px; font-size: 12px; margin-bottom: 0; border-radius: 6px; }
 
-  @keyframes pulse-alert {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-  .med-due-alert {
-    animation: pulse-alert 1.2s infinite ease-in-out;
-  }
+  @keyframes pulse-alert { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+  .med-due-alert { animation: pulse-alert 1.2s infinite ease-in-out; }
 
   @media (max-width: 760px) {
     .client-card-grid { grid-template-columns: 1fr; }
@@ -235,7 +149,7 @@
     <p class="text-muted">Paste the Web App URL from your Google Apps Script deployment.</p>
     <label for="script-url" class="form-label fw-bold">Apps Script Web App URL</label>
     <input type="text" id="script-url" class="form-control mb-3" placeholder="https://script.google.com/macros/s/.../exec">
-    <button class="btn btn-teal text-white w-100" style="background:var(--teal);" onclick="saveConfig()">Save and connect</button>
+    <button class="btn text-white w-100" style="background:var(--teal);" onclick="saveConfig()">Save and connect</button>
     <div id="config-error" class="text-danger mt-2" style="display:none;"></div>
   </div>
 
@@ -347,24 +261,22 @@ function isMedDueSoon(medTimesStr) {
 }
 
 function evaluateScripts(c) {
-  const status = (c['Scripts Status'] || '').trim();
-  const submittedDate = c['Submitted Date'];
-
-  if (status !== 'Submitted') {
-    return { label: 'Not submitted', level: 'danger' };
+  const status = (c['Scripts Status'] || '').trim().toLowerCase();
+  
+  if (status === 'dropped off') {
+    return { label: 'Dropped off — Ready for pickup / check pharmacy', level: 'info', alertType: 'primary' };
   }
-  if (!submittedDate) {
-    return { label: 'Submitted (no date)', level: 'warning' };
+  if (status === 'submitted') {
+    return { label: 'Submitted — Pending pharmacy', level: 'warning', alertType: 'warning' };
   }
-  const d = new Date(submittedDate);
-  const today = new Date();
-  const submittedIsToday = !isNaN(d) && d.toDateString() === today.toDateString();
-  const pastFourPM = today.getHours() >= 16;
-
-  if (submittedIsToday && !pastFourPM) {
-    return { label: 'Submitted \u2014 ready by 4:00 PM', level: 'warning' };
+  if (status === 'ready for pickup' || status === 'ready') {
+    return { label: 'Ready for pickup', level: 'success', alertType: 'success' };
   }
-  return { label: 'Ready for pickup', level: 'success' };
+  if (status === 'completed' || status === 'picked up') {
+    return { label: 'Completed', level: 'secondary', alertType: 'secondary' };
+  }
+  
+  return { label: 'Not submitted', level: 'danger', alertType: 'danger' };
 }
 
 function evaluateClient(c) {
@@ -385,7 +297,7 @@ function evaluateClient(c) {
     const until = daysUntil(apptDateRaw);
     if (until !== null) {
       if (until < 0) {
-        alerts.push({ type: 'danger', message: 'Appointment date passed \u2014 action needed' });
+        alerts.push({ type: 'danger', message: 'Appointment date passed — action needed' });
         escalate('red');
       } else if (until <= APPT_SOON_DAYS) {
         alerts.push({ type: 'warning', message: `Upcoming appointment in ${until} day(s)` });
@@ -396,10 +308,13 @@ function evaluateClient(c) {
 
   // Scripts status alert check
   const scripts = evaluateScripts(c);
-  if (scripts.level === 'danger') {
+  if (scripts.alertType === 'danger') {
     alerts.push({ type: 'danger', message: `Scripts: ${scripts.label}` });
     escalate('red');
-  } else if (scripts.level === 'warning') {
+  } else if (scripts.alertType === 'primary') {
+    alerts.push({ type: 'primary', message: `🚗 SCRIPTS DROPPED OFF — Ready for pickup / check pharmacy` });
+    escalate('amber');
+  } else if (scripts.alertType === 'warning') {
     alerts.push({ type: 'warning', message: `Scripts: ${scripts.label}` });
     escalate('amber');
   }
@@ -414,14 +329,14 @@ function buildCardHtml(c, ev) {
 
   card.className = `client-card urgent-${ev.urgency}`;
 
-  // Generate Bootstrap Notifications / Alerts
+  // Generate Alert Banners
   let alertBannersHtml = ev.alerts.map(a => 
     `<div class="alert alert-${a.type} d-flex align-items-center py-1 px-2 m-0" role="alert">
        <span class="me-2">⚠️</span> <div>${a.message}</div>
      </div>`
   ).join('');
 
-  // Patient notes banner (Bootstrap Info Alert)
+  // Patient notes banner
   const notesText = (c['Notes'] || '').trim();
   if (notesText) {
     alertBannersHtml += `
@@ -430,7 +345,7 @@ function buildCardHtml(c, ev) {
       </div>`;
   }
 
-  // Med time notification banner (Bootstrap Urgent Alert)
+  // Med time notification banner
   const medTimes = (c['Med Times'] || '').trim();
   if (medDue) {
     alertBannersHtml += `
@@ -443,6 +358,12 @@ function buildCardHtml(c, ev) {
         <span class="me-2">⏰</span> <div><strong>Med Times:</strong> ${medTimes}</div>
       </div>`;
   }
+
+  // 2nd / Secondary Appointment Check
+  const secondAppt = (c['2nd Appt / Follow-up'] || c['2nd Appt'] || '').trim();
+  const secondApptHtml = secondAppt 
+    ? `<div class="mt-1"><span class="badge bg-info text-dark">2nd Appt: ${secondAppt}</span></div>` 
+    : '';
 
   card.innerHTML = `
     <div class="client-card-grid">
@@ -458,7 +379,8 @@ function buildCardHtml(c, ev) {
       <div class="cell">
         <div class="field-label">Appointment</div>
         <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
-        <div class="field-sub">${c['Appointment With'] || ''} ${c['Doctor'] ? '• ' + c['Doctor'] : ''}</div>
+        <div class="field-sub">${c['Doctor'] ? 'Dr. ' + c['Doctor'] : ''}</div>
+        ${secondApptHtml}
       </div>
 
       <div class="cell">
