@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Respite Program &middot; Client Status Board</title>
+<!-- Bootstrap 5.3.3 CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
 <style>
   :root {
@@ -16,26 +17,15 @@
     --teal-deep: #0d3d33;
     --teal: #12735c;
     --teal-light: #e2f2ec;
-    --sage: #9ec2b3;
     --male-bg: #dceaf6;
     --male-fg: #2c5f8a;
     --female-bg: #e7ddf5;
     --female-fg: #5e3a96;
     --red: #a32d2d;
-    --red-bg: #fbe9e9;
     --amber: #8a5a0b;
-    --amber-bg: #fdf1de;
     --green: #276a2f;
-    --green-bg: #e9f3e8;
-    --doctor-bg: #dbe9fb;
-    --doctor-fg: #1f4f8f;
-    --casemgr-bg: #ece1f9;
-    --casemgr-fg: #5a2f96;
-    --other-bg: #fdeadb;
-    --other-fg: #935a15;
     --shadow: 0 1px 2px rgba(20,40,35,0.06), 0 4px 14px rgba(20,40,35,0.05);
   }
-  * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: "Segoe UI", -apple-system, Helvetica, Arial, sans-serif;
@@ -90,29 +80,7 @@
   }
   button.icon-btn:hover { background: rgba(255,255,255,0.2); }
 
-  main { max-width: 1080px; margin: 0 auto; padding: 26px 20px 60px; }
-
-  #config-screen {
-    max-width: 480px;
-    margin: 60px auto;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 32px;
-    box-shadow: var(--shadow);
-  }
-  #config-screen h2 { font-size: 16px; margin: 0 0 8px; color: var(--teal-deep); }
-  #config-screen p { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 20px; }
-  #config-screen label { font-size: 12px; font-weight: 600; color: var(--slate); display: block; margin-bottom: 6px; }
-  #config-screen input {
-    width: 100%; padding: 10px 12px; font-size: 13px;
-    border: 1px solid var(--line); border-radius: 8px; margin-bottom: 16px;
-  }
-  #config-screen button {
-    background: var(--teal); color: #fff; border: none; border-radius: 8px;
-    padding: 11px 18px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;
-  }
-  #config-error { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+  main { max-width: 1200px; margin: 0 auto; padding: 26px 20px 60px; }
 
   .summary-bar {
     display: grid;
@@ -168,41 +136,31 @@
   .board-column-header.male .dot { background: var(--male-fg); }
   .board-column-header.female .dot { background: var(--female-fg); }
 
-  .client-list { display: flex; flex-direction: column; gap: 7px; }
-
-  .client-card.empty-bed {
-    opacity: 0.55;
-    justify-content: center;
-    grid-template-columns: 44px 1fr;
-  }
-  .client-card.empty-bed .field-value { color: var(--muted); font-style: italic; }
+  .client-list { display: flex; flex-direction: column; gap: 12px; }
 
   .client-card {
     background: var(--card);
     border: 1px solid var(--line);
-    border-left: 5px solid var(--line);
-    border-radius: 9px;
-    padding: 9px 14px;
-    display: grid;
-    grid-template-columns: 44px 1fr 1fr 1fr 78px;
-    gap: 12px;
-    align-items: center;
+    border-left: 6px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
     box-shadow: var(--shadow);
   }
   .client-card.urgent-red { border-left-color: var(--red); }
   .client-card.urgent-amber { border-left-color: var(--amber); }
   .client-card.urgent-green { border-left-color: var(--green); }
 
-  @keyframes med-flash {
-    0%, 100% { border-left-color: var(--red); box-shadow: var(--shadow); }
-    50% { border-left-color: #e23b3b; box-shadow: 0 0 0 3px rgba(226,59,59,0.35), var(--shadow); }
-  }
-  .client-card.med-due {
-    animation: med-flash 1s ease-in-out infinite;
+  .client-card-grid {
+    display: grid;
+    grid-template-columns: 42px 1fr 1.2fr 1.2fr 1fr;
+    gap: 12px;
+    align-items: start;
   }
 
+  .client-card.empty-bed { opacity: 0.55; }
+
   .avatar {
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 38px; height: 38px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 12px;
   }
@@ -210,99 +168,42 @@
   .avatar.female { background: var(--female-bg); color: var(--female-fg); }
   .avatar.unknown { background: var(--teal-light); color: var(--teal); }
 
-  .field-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+  .field-label { font-size: 10px; color: var(--teal); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; font-weight: 700; padding-bottom: 3px; border-bottom: 1px solid var(--line); }
+  .field-value { font-size: 13.5px; color: var(--ink); font-weight: 600; }
+  .field-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
 
-  .client-card .cell {
+  .cell {
     border-left: 1px solid var(--line);
-    padding-left: 12px;
-    align-self: stretch;
+    padding-left: 10px;
   }
-  .appt-group {
+
+  /* Custom tweaks for Bootstrap alerts inside cards */
+  .card-notifications {
+    grid-column: 1 / -1;
+    margin-top: 10px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin: 4px 0 2px;
+    flex-direction: column;
+    gap: 6px;
   }
-  .field-value { font-size: 13.5px; color: var(--ink); font-weight: 500; }
-  .field-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-  .badge {
-    display: inline-block; font-size: 11px; font-weight: 700;
-    padding: 4px 11px; border-radius: 20px; white-space: nowrap;
-  }
-  .badge.red { background: var(--red-bg); color: var(--red); }
-  .badge.amber { background: var(--amber-bg); color: var(--amber); }
-  .badge.green { background: var(--green-bg); color: var(--green); }
-
-  .flags { margin-top: 6px; }
-  .flag-pill {
-    display: inline-block; font-size: 10.5px; padding: 3px 9px; border-radius: 10px;
-    margin-right: 5px; margin-top: 5px; font-weight: 600;
-  }
-  .flag-pill.red { background: var(--red-bg); color: var(--red); }
-  .flag-pill.amber { background: var(--amber-bg); color: var(--amber); }
-
-  .appt-badge {
-    display: inline-block; font-size: 10.5px; font-weight: 700;
-    padding: 3px 9px; border-radius: 6px; margin-top: 4px;
-  }
-  .appt-badge.doctor { background: var(--doctor-bg); color: var(--doctor-fg); }
-  .appt-badge.casemgr { background: var(--casemgr-bg); color: var(--casemgr-fg); }
-  .appt-badge.other { background: var(--other-bg); color: var(--other-fg); }
-
-  @keyframes pulse-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.45; }
-  }
-  .blinking {
-    animation: pulse-blink 1.4s ease-in-out infinite;
-  }
-
-  .notes-row {
-    grid-column: 1 / -1;
-    margin-top: 6px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--line);
-    font-size: 12.5px;
-    color: var(--slate);
-    font-style: italic;
-  }
-  .notes-row .notes-label {
-    font-style: normal; font-weight: 700; color: var(--muted);
-    text-transform: uppercase; font-size: 10px; letter-spacing: 0.4px; margin-right: 6px;
-  }
-
-  .status-chip {
-    display: inline-block; font-size: 10px; font-weight: 700;
-    padding: 3px 9px; border-radius: 6px; margin-top: 4px;
-  }
-  .status-chip.chip-amber { background: var(--amber-bg); color: var(--amber); }
-  .status-chip.chip-blue { background: var(--doctor-bg); color: var(--doctor-fg); }
-  .status-chip.chip-green { background: var(--green-bg); color: var(--green); }
-  .status-chip.chip-gray { background: #eef1f0; color: var(--muted); }
-
-  .med-times-row {
-    grid-column: 1 / -1;
-    margin-top: 6px;
-    padding-top: 8px;
+  .card-notifications .alert {
+    padding: 6px 12px;
     font-size: 12px;
-    color: var(--slate);
-  }
-  .med-times-row .notes-label {
-    font-weight: 700; color: var(--muted);
-    text-transform: uppercase; font-size: 10px; letter-spacing: 0.4px; margin-right: 6px;
+    margin-bottom: 0;
+    border-radius: 6px;
   }
 
-  .empty-state, .error-state {
-    text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px;
+  @keyframes pulse-alert {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
-  .error-state { color: var(--red); }
+  .med-due-alert {
+    animation: pulse-alert 1.2s infinite ease-in-out;
+  }
 
   @media (max-width: 760px) {
-    .client-card { grid-template-columns: 1fr; }
+    .client-card-grid { grid-template-columns: 1fr; }
     .summary-bar { grid-template-columns: repeat(2, 1fr); }
     .board-columns { grid-template-columns: 1fr; }
-    .legend { margin-left: 0; }
   }
 </style>
 </head>
@@ -329,13 +230,13 @@
 
 <main>
 
-  <div id="config-screen" style="display:none;">
+  <div id="config-screen" style="display:none;" class="card p-4 mx-auto style-config">
     <h2>Connect your data source</h2>
-    <p>Paste the Web App URL from your Google Apps Script deployment. This is stored only in your browser and is never sent anywhere except directly to your own script.</p>
-    <label for="script-url">Apps Script Web App URL</label>
-    <input type="text" id="script-url" placeholder="https://script.google.com/macros/s/.../exec">
-    <button onclick="saveConfig()">Save and connect</button>
-    <div id="config-error"></div>
+    <p class="text-muted">Paste the Web App URL from your Google Apps Script deployment.</p>
+    <label for="script-url" class="form-label fw-bold">Apps Script Web App URL</label>
+    <input type="text" id="script-url" class="form-control mb-3" placeholder="https://script.google.com/macros/s/.../exec">
+    <button class="btn btn-teal text-white w-100" style="background:var(--teal);" onclick="saveConfig()">Save and connect</button>
+    <div id="config-error" class="text-danger mt-2" style="display:none;"></div>
   </div>
 
   <div id="dashboard" style="display:none;">
@@ -379,10 +280,10 @@
         <div class="client-list" id="client-list-female"></div>
       </div>
     </div>
-    <div class="empty-state" id="empty-state" style="display:none;">No clients match this filter.</div>
+    <div class="text-center p-5 text-muted" id="empty-state" style="display:none;">No clients match this filter.</div>
   </div>
 
-  <div class="error-state" id="error-state" style="display:none;"></div>
+  <div class="text-center p-5 text-danger" id="error-state" style="display:none;"></div>
 
 </main>
 
@@ -390,13 +291,11 @@
 let scriptUrl = localStorage.getItem('clientStatusScriptUrl') || '';
 let clients = [];
 let currentFilter = 'all';
-let refreshTimer = null;
 
 const APPT_SOON_DAYS = 2;
+const MED_WINDOW_MIN = 15;
 
-function initials(str) {
-  return (str || '?').trim();
-}
+function initials(str) { return (str || '?').trim(); }
 
 function genderFromBed(bed) {
   if (!bed) return 'unknown';
@@ -404,16 +303,6 @@ function genderFromBed(bed) {
   if (b.startsWith('M')) return 'male';
   if (b.startsWith('F')) return 'female';
   return 'unknown';
-}
-
-function daysSince(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return null;
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  d.setHours(0,0,0,0);
-  return Math.round((today - d) / 86400000);
 }
 
 function daysUntil(dateStr) {
@@ -426,41 +315,7 @@ function daysUntil(dateStr) {
   return Math.round((d - today) / 86400000);
 }
 
-function apptTypeClass(apptWith) {
-  const v = (apptWith || '').trim().toLowerCase();
-  if (v === 'doctor') return 'doctor';
-  if (v === 'case manager') return 'casemgr';
-  if (v === 'other') return 'other';
-  return null;
-}
-
-function apptStatusClass(status) {
-  const v = (status || '').trim().toLowerCase();
-  if (v === 'requested') return 'chip-amber';
-  if (v === 'scheduled') return 'chip-blue';
-  if (v === 'completed') return 'chip-green';
-  return 'chip-gray';
-}
-
-function pharmStatusClass(status) {
-  const v = (status || '').trim().toLowerCase();
-  if (v === 'waiting scripts') return 'chip-amber';
-  if (v === 'dropped off') return 'chip-blue';
-  if (v === 'picked up') return 'chip-green';
-  return 'chip-gray';
-}
-
-// Is any of this client's med times within 15 minutes (before or after) of "now" in Central time?
-const MED_WINDOW_MIN = 15;
-
-function nowInCentral() {
-  // Get current time as it would read on a clock in America/Chicago
-  const str = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
-  return new Date(str);
-}
-
 function parseMedTimesToMinutes(medTimesStr) {
-  // medTimesStr looks like "8:00 AM / 8:00 PM | 7:00 AM | ..." - extract every h:mm AM/PM
   const results = [];
   if (!medTimesStr) return results;
   const matches = medTimesStr.match(/\d{1,2}:\d{2}\s*(AM|PM)/gi);
@@ -481,22 +336,14 @@ function parseMedTimesToMinutes(medTimesStr) {
 function isMedDueSoon(medTimesStr) {
   const times = parseMedTimesToMinutes(medTimesStr);
   if (times.length === 0) return false;
-  const central = nowInCentral();
+  const str = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+  const central = new Date(str);
   const nowMin = central.getHours() * 60 + central.getMinutes();
   return times.some(t => {
     let diff = Math.abs(t - nowMin);
-    diff = Math.min(diff, 1440 - diff); // handle wrap around midnight
+    diff = Math.min(diff, 1440 - diff);
     return diff <= MED_WINDOW_MIN;
   });
-}
-
-function isToday(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return false;
-  const today = new Date();
-  return d.getFullYear() === today.getFullYear() &&
-         d.getMonth() === today.getMonth() &&
-         d.getDate() === today.getDate();
 }
 
 function evaluateScripts(c) {
@@ -504,25 +351,25 @@ function evaluateScripts(c) {
   const submittedDate = c['Submitted Date'];
 
   if (status !== 'Submitted') {
-    return { label: 'Not submitted', level: 'red', blink: false };
+    return { label: 'Not submitted', level: 'danger' };
   }
   if (!submittedDate) {
-    return { label: 'Submitted (no date entered)', level: 'amber', blink: false };
+    return { label: 'Submitted (no date)', level: 'warning' };
   }
-  const submittedIsToday = isToday(submittedDate);
-  const now = new Date();
-  const pastFourPM = now.getHours() >= 16;
+  const d = new Date(submittedDate);
+  const today = new Date();
+  const submittedIsToday = !isNaN(d) && d.toDateString() === today.toDateString();
+  const pastFourPM = today.getHours() >= 16;
 
   if (submittedIsToday && !pastFourPM) {
-    return { label: 'Submitted \u2014 ready by 4:00 PM today', level: 'amber', blink: true };
+    return { label: 'Submitted \u2014 ready by 4:00 PM', level: 'warning' };
   }
-  // Submitted today after 4pm, or submitted on an earlier day -> ready
-  return { label: 'Ready for pickup', level: 'green', blink: false };
+  return { label: 'Ready for pickup', level: 'success' };
 }
 
 function evaluateClient(c) {
   const apptDateRaw = c['Appointment Date'];
-  const flags = [];
+  const alerts = [];
   let worst = 'green';
 
   function escalate(level) {
@@ -530,95 +377,110 @@ function evaluateClient(c) {
     else if (level === 'amber' && worst !== 'red') worst = 'amber';
   }
 
-  // Appointment status
+  // Appointment status alert check
   if (!apptDateRaw) {
-    flags.push({ text: 'No appointment scheduled', level: 'red' });
+    alerts.push({ type: 'danger', message: 'Appointment not scheduled' });
     escalate('red');
   } else {
     const until = daysUntil(apptDateRaw);
     if (until !== null) {
       if (until < 0) {
-        flags.push({ text: 'Appointment date passed \u2014 verify', level: 'red' });
+        alerts.push({ type: 'danger', message: 'Appointment date passed \u2014 action needed' });
         escalate('red');
       } else if (until <= APPT_SOON_DAYS) {
-        flags.push({ text: `Appointment in ${until}d`, level: 'amber' });
+        alerts.push({ type: 'warning', message: `Upcoming appointment in ${until} day(s)` });
         escalate('amber');
       }
     }
   }
 
-  // Scripts
+  // Scripts status alert check
   const scripts = evaluateScripts(c);
-  if (scripts.level === 'red') {
-    flags.push({ text: scripts.label, level: 'red' });
+  if (scripts.level === 'danger') {
+    alerts.push({ type: 'danger', message: `Scripts: ${scripts.label}` });
     escalate('red');
-  } else if (scripts.level === 'amber') {
-    flags.push({ text: scripts.label, level: 'amber' });
+  } else if (scripts.level === 'warning') {
+    alerts.push({ type: 'warning', message: `Scripts: ${scripts.label}` });
     escalate('amber');
   }
 
-  return { flags, urgency: worst, scripts };
+  return { alerts, urgency: worst, scripts };
 }
 
 function buildCardHtml(c, ev) {
   const gender = genderFromBed(c['Bed']);
-  const flagsHtml = ev.flags.map(f => `<span class="flag-pill ${f.level}">${f.text}</span>`).join('');
-
-  const apptClass = apptTypeClass(c['Appointment With']);
-  const apptBadgeHtml = apptClass
-    ? `<span class="appt-badge ${apptClass}">${c['Appointment With']}</span>`
-    : '';
-
-  const scriptsClasses = ['badge', ev.scripts.level, ev.scripts.blink ? 'blinking' : ''].join(' ').trim();
-
-  const notesText = (c['Notes'] || '').trim();
-  const notesHtml = notesText
-    ? `<div class="notes-row"><span class="notes-label">Notes</span>${notesText}</div>`
-    : '';
-
   const card = document.createElement('div');
   const medDue = isMedDueSoon(c['Med Times']);
-  card.className = `client-card urgent-${ev.urgency}${medDue ? ' med-due' : ''}`;
-  const apptStatus = (c['Appointment Status'] || '').trim();
-  const apptStatusHtml = apptStatus
-    ? `<span class="status-chip ${apptStatusClass(apptStatus)}">${apptStatus}</span>` : '';
 
-  const pharmStatus = (c['Pharmacy Status'] || '').trim();
-  const pharmStatusHtml = pharmStatus
-    ? `<span class="status-chip ${pharmStatusClass(pharmStatus)}">${pharmStatus}</span>` : '';
+  card.className = `client-card urgent-${ev.urgency}`;
 
+  // Generate Bootstrap Notifications / Alerts
+  let alertBannersHtml = ev.alerts.map(a => 
+    `<div class="alert alert-${a.type} d-flex align-items-center py-1 px-2 m-0" role="alert">
+       <span class="me-2">⚠️</span> <div>${a.message}</div>
+     </div>`
+  ).join('');
+
+  // Patient notes banner (Bootstrap Info Alert)
+  const notesText = (c['Notes'] || '').trim();
+  if (notesText) {
+    alertBannersHtml += `
+      <div class="alert alert-info d-flex align-items-center py-1 px-2 m-0" role="alert">
+        <span class="me-2">ℹ️</span> <div><strong>Note:</strong> ${notesText}</div>
+      </div>`;
+  }
+
+  // Med time notification banner (Bootstrap Urgent Alert)
   const medTimes = (c['Med Times'] || '').trim();
-  const medTimesHtml = medTimes
-    ? `<div class="med-times-row"><span class="notes-label">Med Times</span>${medTimes}</div>` : '';
+  if (medDue) {
+    alertBannersHtml += `
+      <div class="alert alert-danger med-due-alert d-flex align-items-center py-1 px-2 m-0 fw-bold" role="alert">
+        <span class="me-2">💊</span> <div>MEDS DUE NOW: ${medTimes}</div>
+      </div>`;
+  } else if (medTimes) {
+    alertBannersHtml += `
+      <div class="alert alert-light border d-flex align-items-center py-1 px-2 m-0 text-muted" role="alert">
+        <span class="me-2">⏰</span> <div><strong>Med Times:</strong> ${medTimes}</div>
+      </div>`;
+  }
 
   card.innerHTML = `
-    <div class="avatar ${gender}">${initials(c['Client Initials'])}</div>
-    <div class="cell">
-      <div class="field-label">Bed</div>
-      <div class="field-value">${c['Bed'] || '\u2014'}</div>
-      <div class="field-sub">${c['Case Manager'] || ''}</div>
-    </div>
-    <div class="cell">
-      <div class="field-label">Appointment</div>
-      <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
-      <div class="appt-group">${apptBadgeHtml}${apptStatusHtml}</div>
-      <div class="field-sub">${c['Appointment Details'] || c['Doctor'] || ''}</div>
-    </div>
-    <div class="cell">
-      <div class="field-label">Scripts / Pharmacy</div>
-      <div class="field-value">${c['Pharmacy'] || '\u2014'}</div>
-      <div class="field-sub"><span class="${scriptsClasses}">${ev.scripts.label}</span></div>
-      ${pharmStatusHtml}
-    </div>
-    <div style="text-align:right;">
-      <span class="badge ${ev.urgency}">${ev.urgency === 'red' ? 'Action needed' : ev.urgency === 'amber' ? 'Watch' : 'On track'}</span>
+    <div class="client-card-grid">
+      <div class="avatar ${gender}">${initials(c['Client Initials'])}</div>
+      
+      <div class="cell">
+        <div class="field-label">Client Info</div>
+        <div class="field-value">${c['Bed'] || '\u2014'}</div>
+        <div class="field-sub">ID: ${c['Member ID'] || '\u2014'}</div>
+        <div class="field-sub">${c['Case Manager'] || ''}</div>
+      </div>
+
+      <div class="cell">
+        <div class="field-label">Appointment</div>
+        <div class="field-value">${c['Appointment Date'] || 'Not scheduled'}</div>
+        <div class="field-sub">${c['Appointment With'] || ''} ${c['Doctor'] ? '• ' + c['Doctor'] : ''}</div>
+      </div>
+
+      <div class="cell">
+        <div class="field-label">Scripts / Pharmacy</div>
+        <div class="field-value">${c['Pharmacy'] || '\u2014'}</div>
+        <div class="field-sub"><span class="badge bg-${ev.scripts.level}">${ev.scripts.label}</span></div>
+      </div>
+
+      <div class="cell">
+        <div class="field-label">Status</div>
+        <div class="field-value">${c['Admit Date'] ? 'Admitted: ' + c['Admit Date'] : '\u2014'}</div>
+        <span class="badge bg-${ev.urgency === 'red' ? 'danger' : ev.urgency === 'amber' ? 'warning text-dark' : 'success'} mt-1">
+          ${ev.urgency === 'red' ? 'Action Needed' : ev.urgency === 'amber' ? 'Watch' : 'On Track'}
+        </span>
+      </div>
+
+      <div class="card-notifications">
+        ${alertBannersHtml}
+      </div>
     </div>
   `;
-  const flagRow = document.createElement('div');
-  flagRow.className = 'flags';
-  flagRow.style.gridColumn = '1 / -1';
-  flagRow.innerHTML = flagsHtml + medTimesHtml + notesHtml;
-  card.appendChild(flagRow);
+
   return card;
 }
 
@@ -626,10 +488,12 @@ function buildEmptyBedCard(bedLabel) {
   const card = document.createElement('div');
   card.className = 'client-card empty-bed';
   card.innerHTML = `
-    <div class="avatar unknown">\u2014</div>
-    <div>
-      <div class="field-label">Bed</div>
-      <div class="field-value">${bedLabel} \u2014 Open</div>
+    <div class="client-card-grid">
+      <div class="avatar unknown">\u2014</div>
+      <div>
+        <div class="field-label">Bed</div>
+        <div class="field-value">${bedLabel} \u2014 Open</div>
+      </div>
     </div>
   `;
   return card;
@@ -659,17 +523,12 @@ function renderClients() {
     ? evaluated
     : evaluated.filter(e => (e.raw['Client Initials'] || '').trim() ? e.eval.urgency === currentFilter : true);
 
-  // Sort by bed label (e.g. "M - 1A", "M - 1B", "M - 2A"...) so rows map to physical room order
   const bedSort = (a, b) => (a.raw['Bed'] || '').localeCompare(b.raw['Bed'] || '', undefined, { numeric: true });
 
   const maleRows = filtered.filter(e => e.gender === 'male').sort(bedSort);
   const femaleRows = filtered.filter(e => e.gender === 'female').sort(bedSort);
 
-  if (maleRows.length === 0 && femaleRows.length === 0 && currentFilter !== 'all') {
-    emptyState.style.display = 'block';
-  } else {
-    emptyState.style.display = 'none';
-  }
+  emptyState.style.display = (maleRows.length === 0 && femaleRows.length === 0 && currentFilter !== 'all') ? 'block' : 'none';
 
   maleRows.forEach(({ raw: c, eval: ev }) => {
     const hasClient = (c['Client Initials'] || '').trim();
@@ -692,19 +551,8 @@ async function fetchData() {
   try {
     const res = await fetch(scriptUrl);
     const rawText = await res.text();
-    let json;
-    try {
-      json = JSON.parse(rawText);
-    } catch (parseErr) {
-      showError('The data source did not return valid data. This usually means a script error on the Google side ' +
-        '(wrong sheet name, not redeployed after an edit, etc). Raw response start: ' +
-        rawText.substring(0, 200));
-      return;
-    }
-    if (json.error) {
-      showError('Access issue: ' + json.error);
-      return;
-    }
+    let json = JSON.parse(rawText);
+    if (json.error) { showError('Access issue: ' + json.error); return; }
     clients = json.clients || [];
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('error-state').style.display = 'none';
@@ -713,8 +561,7 @@ async function fetchData() {
       '<span class="status-dot"></span>Updated ' + new Date(json.updated).toLocaleTimeString();
     renderClients();
   } catch (err) {
-    showError('Network-level failure reaching the URL (likely CORS or an invalid/undeployed URL). ' +
-      'Technical detail: ' + err.message);
+    showError('Error connecting to script: ' + err.message);
   }
 }
 
@@ -733,34 +580,18 @@ function showConfig() {
 
 function saveConfig() {
   const val = document.getElementById('script-url').value.trim();
-  const errorDiv = document.getElementById('config-error');
-  if (!val.startsWith('https://script.google.com/')) {
-    errorDiv.textContent = 'That doesn\'t look like a Google Apps Script Web App URL. It should start with https://script.google.com/';
-    errorDiv.style.display = 'block';
-    return;
-  }
+  if (!val.startsWith('https://script.google.com/')) return;
   scriptUrl = val;
   localStorage.setItem('clientStatusScriptUrl', val);
-  errorDiv.style.display = 'none';
   fetchData();
 }
 
-function refreshNow() {
-  fetchData();
-}
+function refreshNow() { fetchData(); }
 
-// Auto-refresh data every 5 minutes
-refreshTimer = setInterval(fetchData, 5 * 60 * 1000);
+setInterval(fetchData, 5 * 60 * 1000);
+setInterval(() => { if (clients.length) renderClients(); }, 60 * 1000);
 
-// Re-render every 60 seconds so the med-time blink turns on/off promptly
-// (uses already-loaded data, no network call)
-setInterval(function () {
-  if (clients && clients.length) renderClients();
-}, 60 * 1000);
-
-// Initial load
 fetchData();
 </script>
-
 </body>
 </html>
